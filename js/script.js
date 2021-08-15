@@ -3,9 +3,12 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 const API_URL = BASE_URL + '/discover/movie?sort_by=popularity.desc&' + API_KEY;
 const IMG_URL = 'https://image.tmdb.org/t/p/w500';
 const searchURL = BASE_URL + '/search/movie?' + API_KEY;
+
+const logo = document.getElementById('title');
 const form = document.getElementById('form');
-const search = document.getElementById('search')
+const search = document.getElementById('search');
 const main = document.getElementById('main');
+const tagsEl = document.getElementById('tags');
 
 const genres = [{
         "id": 28,
@@ -84,11 +87,75 @@ const genres = [{
         "name": "Western"
     }
 ]
-const tagsEl = document.getElementById('tags');
 
-let selectedGenre = [];
+getMovies(API_URL);
 
-setGenre();
+function getMovies(url) {
+    fetch(url).then(res => res.json()).then(data => {
+        console.log(data.results)
+        showMovies(data.results);
+    })
+}
+
+function showMovies(data) {
+    main.innerHTML = '';
+    data.forEach(movie => {
+        const { title, poster_path, vote_average, overview } = movie;
+
+        const movieEl = document.createElement('div');
+        movieEl.className = 'movie';
+
+        movieEl.innerHTML = `
+        <img src="${poster_path? IMG_URL+poster_path:'http://via.placeholder.com/1080x1580'}" alt="${title}">
+
+        <div class="movie-info">
+            <h3>${title}</h3>
+            <span class="${getColor(vote_average)}">${vote_average}</span>
+        </div>
+
+        <div class="overview">
+            <h3>Overview</h3>
+            ${overview}
+        </div>`
+        main.appendChild(movieEl)
+    });
+}
+
+function getColor(vote) {
+    if (vote >= 8) {
+        return 'green';
+    } else if (vote >= 5) {
+        return 'orange';
+    } else {
+        return 'red';
+    }
+}
+
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const searchTerm = search.value;
+
+    if (searchTerm) {
+        getMovies(searchURL + '&query=' + searchTerm);
+    } else {
+        getMovies(API_URL);
+    }
+
+});
+
+logo.addEventListener('click', () => {
+
+    getMovies(API_URL);
+    search.value = '';
+    selectGenre = [];
+
+    setGenre();
+    getMovies(API_URL);
+});
+
+let selectGenre = [];
+
+setGenre()
 
 function setGenre() {
     tagsEl.innerHTML = '';
@@ -98,122 +165,59 @@ function setGenre() {
         t.id = genre.id;
         t.innerText = genre.name;
         t.addEventListener('click', () => {
-            if (selectedGenre.length == 0) {
-                selectedGenre.push(genre.id);
+            if (selectGenre.length == 0) {
+                selectGenre.push(genre.id);
             } else {
-                if (selectedGenre.includes(genre.id)) {
-                    selectedGenre.forEach((id, idx) => {
+                if (selectGenre.includes(genre.id)) {
+                    selectGenre.forEach((id, idx) => {
                         if (id == genre.id) {
-                            selectedGenre.splice(idx, 1);
+                            selectGenre.splice(idx, 1)
                         }
                     })
                 } else {
-                    selectedGenre.push(genre.id);
+                    selectGenre.push(genre.id);
                 }
             }
-            console.log(selectedGenre)
-            getMovies(API_URL + '&with_genres=' + encodeURI(selectedGenre.join(',')))
-            highlightSelection()
-        })
+            console.log(selectGenre);
+
+            getMovies(API_URL + '&with_genres=' + encodeURI(selectGenre.join(',')));
+            highlight();
+        });
+
         tagsEl.append(t);
-    })
+    });
 }
 
-function highlightSelection() {
+
+function highlight() {
     const tags = document.querySelectorAll('.tag');
     tags.forEach(tag => {
         tag.classList.remove('highlight');
     });
-    clearBtn();
-    if (selectedGenre.length != 0) {
-        selectedGenre.forEach(id => {
-            const hightlightedTag = document.getElementById(id);
-            hightlightedTag.classList.add('highlight');
+    clearBtn()
+    if (selectGenre != 0) {
+        selectGenre.forEach(id => {
+            const highlightedTag = document.getElementById(id);
+            highlightedTag.classList.add('highlight');
         })
     }
-
 }
 
 function clearBtn() {
     let clearBtn = document.getElementById('clear');
     if (clearBtn) {
-        clearBtn.classList.add('highlight')
+        clearBtn.classList.add('highlight');
     } else {
-
         let clear = document.createElement('div');
         clear.classList.add('tag', 'highlight');
         clear.id = 'clear';
-        clear.innerText = 'Clear x';
+        clear.innerText = 'Clear X';
         clear.addEventListener('click', () => {
-            selectedGenre = [];
+            selectGenre = [];
             setGenre();
             getMovies(API_URL);
-        })
+        });
         tagsEl.append(clear);
     }
 
 }
-
-getMovies(API_URL);
-
-function getMovies(url) {
-    fetch(url).then(res => res.json()).then(data => {
-        // console.log(data.results);
-        if (data.results.length !== 0) {
-            showMovies(data.results);
-        } else {
-            main.innerHTML = `<h1 class='no-results'>No Results Found</h1>`
-
-        }
-    });
-}
-
-
-function showMovies(data) {
-    main.innerHTML = '';
-
-    data.forEach(movie => {
-        const { title, poster_path, vote_average, overview } = movie;
-
-        const movieEl = document.createElement('div');
-        movieEl.classList.add('move');
-        movieEl.innerHTML = `
-        <div class="movie">
-            <img src="${poster_path? IMG_URL+poster_path:'http://via.placeholder.com/1080x1580'}" alt="${title}">
-
-            <div class="movie-info">
-                <h3>${title}</h3>
-                <span class="${getColor(vote_average)}">${vote_average}</span>
-            </div>
-
-            <div class="overview">
-                <h3>Overview</h3>
-                ${overview}
-            </div>
-        </div> `
-
-        main.appendChild(movieEl);
-    });
-}
-
-function getColor(vote) {
-    if (vote >= 8) {
-        return 'green';
-    } else if (vote >= 5) {
-        return 'orange'
-    } else {
-        return 'red'
-    }
-}
-
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const searchTerm = search.value;
-    selectedGenre = [];
-    highlightSelection();
-    if (searchTerm) {
-        getMovies(searchURL + '&query=' + searchTerm);
-    } else {
-        getMovies(API_URL)
-    }
-});

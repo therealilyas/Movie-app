@@ -10,7 +10,7 @@
 }
 
 body {
-    background-color: rgb(15, 15, 15);
+    background-color: var(--private-color);
     font-family: 'Poppins', sans-serif;
     margin: 0;
 }
@@ -21,7 +21,7 @@ header {
     justify-content: flex-end;
     background-color: var(--private-color);
     color: var(--secondary-color);
-    box-shadow: 5px 5px 15px rgb(0, 0, 0);
+    box-shadow: 5px 5px 15px rgb(77, 42, 42);
     margin-bottom: 1rem;
 }
 
@@ -30,6 +30,7 @@ header {
     left: 5rem;
     top: -2.5rem;
     font-size: 3rem;
+    cursor: pointer;
 }
 
 .search {
@@ -45,6 +46,22 @@ header {
     color: var(--secondary-color);
 }
 
+.clear-btn {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 100%;
+    font-size: 1rem;
+    position: relative;
+    left: -2rem;
+    cursor: pointer;
+}
+
+.clear-btn:active {
+    background-color: white;
+    color: var(--secondary-color);
+}
+
 main {
     display: flex;
     flex-wrap: wrap;
@@ -54,7 +71,7 @@ main {
 .movie {
     width: 300px;
     margin: 1rem;
-    border-radius: 3px;
+    /* border-radius: 3px; */
     box-shadow: 0.2px 0.2px 4px 5px rgba(0, 0, 0, 0.644);
     position: relative;
     overflow: hidden;
@@ -77,6 +94,7 @@ main {
 .movie-info h3 {
     margin-top: 0;
     color: var(--secondary-color);
+    font-weight: 700;
 }
 
 .movie-info span {
